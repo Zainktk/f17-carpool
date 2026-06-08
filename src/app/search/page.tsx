@@ -54,7 +54,7 @@ export default function SearchPage() {
       <div className={styles.recentSearches}>
         <h3>Popular Destinations</h3>
         <div>
-          {["FAST University", "NUST University", "Blue Area", "Islamabad Airport", "Centaurus Mall"].map(dest => (
+          {["FAST University", "NUST University", "Blue Area", "Islamabad Airport", "Centaurus Mall"].map((dest: string) => (
             <span key={dest} className={styles.tag} onClick={() => { setTo(dest); handleSearch(); }}>
               {dest}
             </span>

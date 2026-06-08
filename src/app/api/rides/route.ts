@@ -49,7 +49,7 @@ export async function GET(request: Request) {
 
     // Apply Geofencing if the active user is a BOOKER and has coordinates
     if (rider && rider.role === "BOOKER" && rider.lat !== null && rider.lng !== null) {
-      filteredRides = rides.filter(ride => {
+      filteredRides = rides.filter((ride: any) => {
         const driver = ride.driver;
         if (driver.lat === null || driver.lng === null || driver.radius === null) {
           return false;

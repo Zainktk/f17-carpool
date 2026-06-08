@@ -76,7 +76,7 @@ function Feed() {
       </header>
 
       <div className={styles.filterTabs}>
-        {["All Rides", "University", "Office Commute", "Airport"].map(tab => (
+        {["All Rides", "University", "Office Commute", "Airport"].map((tab: string) => (
           <button 
             key={tab}
             className={`${styles.tab} ${activeTab === tab ? styles.active : ""}`}
@@ -93,7 +93,7 @@ function Feed() {
         ) : rides.length === 0 ? (
           <div style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)" }}>No rides available. Add one!</div>
         ) : (
-          rides.filter(ride => {
+          rides.filter((ride: any) => {
             if (activeTab === "All Rides") return true;
             const dest = ride.to.toLowerCase();
             if (activeTab === "University" && (dest.includes("university") || dest.includes("nust") || dest.includes("fast"))) return true;

@@ -94,7 +94,7 @@ export default function ChatPage({ params }: { params: Promise<{ rideId: string,
         {messages.length === 0 ? (
           <div className={styles.empty}>Send a message to coordinate your ride.</div>
         ) : (
-          messages.map(msg => {
+          messages.map((msg: any) => {
             const isMe = msg.senderId === user.id;
             return (
               <div key={msg.id} className={`${styles.messageWrapper} ${isMe ? styles.me : styles.them}`}>
