@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  createdAt    DateTime  @default(now())
+  name         String
+  email        String    @unique
+  password     String
+  role         String    // "BOOKER" or "OFFERER"
+  society      String
+  rating       Float     @default(5.0)
+  carModel     String?
+  carColor     String?
+  licensePlate String?
+  isVerified   Boolean   @default(false)
+  lat          Float?
+  lng          Float?
+  radius       Float?    // Radius in meters
+  otp          String?
+  otpExpiresAt DateTime?
+  ridesOffered Ride[]    @relation("OfferedRides")
+  bookings     Booking[]
+  sentMessages Message[] @relation("SentMessages")
+  recvMessages Message[] @relation("ReceivedMessages")
+}
+
+model Ride {
+  id             Int       @id @default(autoincrement())
+  createdAt      DateTime  @default(now())
+  driverId       Int
+  driver         User      @relation("OfferedRides", fields: [driverId], references: [id])
+  from           String
+  to             String
+  time           String
+  price          String
+  destLat        Float?
+  destLng        Float?
+  availableSeats Int
+  bookings       Booking[]
+  messages       Message[]
+}
+
+model Booking {
+  id      Int  @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  rideId  Int
+  riderId Int
+  ride    Ride @relation(fields: [rideId], references: [id])
+  rider   User @relation(fields: [riderId], references: [id])
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  rideId     Int
+  senderId   Int
+  receiverId Int
+  content    String
+
+  ride       Ride @relation(fields: [rideId], references: [id])
+  sender     User @relation("SentMessages", fields: [senderId], references: [id])
+  receiver   User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+}
