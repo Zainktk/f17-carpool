@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     }
 
     // Run transaction to ensure atomicity
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       const ride = await tx.ride.findUnique({
         where: { id: parseInt(rideId) }
       });
