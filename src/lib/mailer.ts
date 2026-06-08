@@ -1,13 +1,19 @@
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import nodemailer from "nodemailer";
 
 export async function sendOTPEmail(to: string, otp: string) {
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'Carpool <onboarding@resend.dev>', // Free tier Resend limit
-      to: [to],
-      subject: 'Verify your F17 Carpool account',
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'zainktk1998@gmail.com', // Your Gmail address
+        pass: process.env.GMAIL_APP_PASSWORD, // The 16-letter app password
+      },
+    });
+
+    const info = await transporter.sendMail({
+      from: '"F17 Carpool" <zainktk1998@gmail.com>',
+      to,
+      subject: "Verify your F17 Carpool account",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>Welcome to F17 Carpool!</h2>
@@ -19,16 +25,10 @@ export async function sendOTPEmail(to: string, otp: string) {
       `,
     });
 
-    if (error) {
-      console.error('Resend API Error:', error);
-      console.log(`[FALLBACK] Verification OTP for ${to} is: ${otp}`);
-      return false;
-    } else {
-      console.log('Email sent:', data);
-      return true;
-    }
+    console.log("Email sent:", info.messageId);
+    return true;
   } catch (error) {
-    console.error("Error sending OTP email via Resend:", error);
+    console.error("Error sending OTP email via Gmail:", error);
     // Fallback log for development
     console.log(`[FALLBACK] Verification OTP for ${to} is: ${otp}`);
     return false;
