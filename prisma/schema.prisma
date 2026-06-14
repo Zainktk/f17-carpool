@@ -29,6 +29,18 @@ model User {
   bookings     Booking[]
   sentMessages Message[] @relation("SentMessages")
   recvMessages Message[] @relation("ReceivedMessages")
+  requestedRides RideRequest[] @relation("RequestedRides")
+}
+
+model RideRequest {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  riderId    Int
+  rider      User     @relation("RequestedRides", fields: [riderId], references: [id])
+  from       String
+  to         String
+  time       String
+  status     String   @default("OPEN") // OPEN, FULFILLED
 }
 
 model Ride {

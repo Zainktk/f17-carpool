@@ -54,18 +54,31 @@ export default function BottomNav() {
       </Link>
       
       {(!user || user.role === "BOOKER") && (
-        <Link href="/search" className={`${styles.navItem} ${pathname === "/search" ? styles.active : ""}`}>
-          <SearchIcon />
-          <span className={styles.label}>Search</span>
-        </Link>
+        <>
+          <Link href="/search" className={`${styles.navItem} ${pathname === "/search" ? styles.active : ""}`}>
+            <SearchIcon />
+            <span className={styles.label}>Search</span>
+          </Link>
+          <Link href="/request-ride" className={styles.navItem}>
+            <div className={styles.fab} style={{ background: "#f39c12" }}>
+              <PlusIcon />
+            </div>
+          </Link>
+        </>
       )}
       
       {user?.role === "OFFERER" && (
-        <Link href="/offer" className={styles.navItem}>
-          <div className={styles.fab}>
-            <PlusIcon />
-          </div>
-        </Link>
+        <>
+          <Link href="/passenger-requests" className={`${styles.navItem} ${pathname === "/passenger-requests" ? styles.active : ""}`}>
+            <SearchIcon />
+            <span className={styles.label}>Requests</span>
+          </Link>
+          <Link href="/offer" className={styles.navItem}>
+            <div className={styles.fab}>
+              <PlusIcon />
+            </div>
+          </Link>
+        </>
       )}
       
       <Link href="/activity" className={`${styles.navItem} ${pathname === "/activity" ? styles.active : ""}`}>
