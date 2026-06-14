@@ -84,8 +84,7 @@ export async function POST(request: Request) {
       }
     });
 
-    // 2. Intelligent Matchmaking
-    // Find rides that match 'from' or 'to' loosely, and where driver is within radius
+    // 2. Intelligent Matchmaking — destination-first scoring
     const potentialRides = await prisma.ride.findMany({
       where: {
         availableSeats: { gt: 0 }
@@ -98,23 +97,62 @@ export async function POST(request: Request) {
       },
     });
 
-    let matches = potentialRides;
-
-    // Geofencing match
-    if (user.lat !== null && user.lng !== null) {
-      matches = potentialRides.filter((ride: any) => {
-        const driver = ride.driver;
-        if (driver.lat === null || driver.lng === null || driver.radius === null) {
-          return false;
-        }
-        const distance = calculateDistance(user.lat!, user.lng!, driver.lat, driver.lng);
-        return distance <= driver.radius;
-      });
+    // Helper: extract meaningful keywords from a location string
+    const STOP_WORDS = new Set(["the","to","in","of","and","a","an","at","for","on","is"]);
+    function extractKeywords(text: string): string[] {
+      return text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .split(/\s+/)
+        .filter(w => w.length > 1 && !STOP_WORDS.has(w));
     }
+
+    const requestToKeywords = extractKeywords(to);
+    const requestFromKeywords = extractKeywords(from);
+
+    // Score each ride
+    const scored = potentialRides.map((ride: any) => {
+      const rideToKeywords = extractKeywords(ride.to);
+      const rideFromKeywords = extractKeywords(ride.from);
+
+      // Destination match score (most important)
+      let destScore = 0;
+      for (const kw of requestToKeywords) {
+        if (rideToKeywords.some(rk => rk.includes(kw) || kw.includes(rk))) {
+          destScore += 10;
+        }
+      }
+
+      // Origin match score (bonus)
+      let originScore = 0;
+      for (const kw of requestFromKeywords) {
+        if (rideFromKeywords.some(rk => rk.includes(kw) || kw.includes(rk))) {
+          originScore += 3;
+        }
+      }
+
+      // Area proximity score (tiebreaker)
+      let proximityScore = 0;
+      if (user.lat !== null && user.lng !== null && ride.driver.lat !== null && ride.driver.lng !== null && ride.driver.radius !== null) {
+        const distance = calculateDistance(user.lat!, user.lng!, ride.driver.lat, ride.driver.lng);
+        if (distance <= ride.driver.radius) {
+          proximityScore = 2;
+        }
+      }
+
+      return { ride, score: destScore + originScore + proximityScore, destScore };
+    });
+
+    // Only return rides that have at least some destination keyword match
+    const matches = scored
+      .filter(s => s.destScore > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map(s => s.ride);
 
     return NextResponse.json({
       request: rideRequest,
-      matches: matches.slice(0, 5) // Return top 5 matches
+      matches
     });
   } catch (error) {
     console.error("Requests POST error:", error);
