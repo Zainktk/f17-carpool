@@ -47,7 +47,10 @@ export default function PushNotificationManager() {
     try {
       const registration = await navigator.serviceWorker.ready;
       const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-      if (!vapidPublicKey) return;
+      if (!vapidPublicKey) {
+        alert("Setup Error: Missing NEXT_PUBLIC_VAPID_PUBLIC_KEY in Vercel.");
+        return;
+      }
 
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
@@ -55,7 +58,7 @@ export default function PushNotificationManager() {
       });
 
       // Send to server
-      await fetch("/api/notifications/subscribe", {
+      const res = await fetch("/api/notifications/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -64,9 +67,14 @@ export default function PushNotificationManager() {
         }),
       });
 
+      if (!res.ok) {
+        alert("Failed to save subscription to database.");
+      }
+
       setShowPrompt(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Push subscription failed", err);
+      alert("Push subscription failed: " + err.message);
     }
   };
 
