@@ -20,6 +20,7 @@ model User {
   carColor     String?
   licensePlate String?
   isVerified   Boolean   @default(false)
+  pushSubscription String?
   lat          Float?
   lng          Float?
   radius       Float?    // Radius in meters

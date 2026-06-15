@@ -59,8 +59,22 @@ export async function POST(request: Request) {
         senderId: myId,
         receiverId: parseInt(receiverId),
         content
+      },
+      include: {
+        sender: true,
+        receiver: true,
       }
     });
+
+    if (message.receiver && message.receiver.pushSubscription) {
+      import("@/lib/webPush").then(({ sendPushNotification }) => {
+        sendPushNotification(message.receiver!.pushSubscription!, {
+          title: `New message from ${message.sender.name}`,
+          body: content,
+          url: `/chat/${rideId}/${myId}`
+        });
+      });
+    }
 
     return NextResponse.json(message);
   } catch (error) {

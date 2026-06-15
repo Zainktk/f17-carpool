@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport = {
-  themeColor: "#0d6efd",
+export const viewport: import("next").Viewport = {
+  themeColor: "#2a2a2a",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -35,6 +35,7 @@ export const viewport = {
 };
 
 import BottomNav from "@/components/BottomNav";
+import PushNotificationManager from "@/components/PushNotificationManager";
 import { AuthProvider } from "@/context/AuthContext";
 
 export default function RootLayout({
@@ -46,10 +47,13 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
         <AuthProvider>
-          <main className="main-content">
-            {children}
-          </main>
-          <BottomNav />
+          <PushNotificationManager />
+          <div className="layout-container">
+            <main className="main-content">
+              {children}
+            </main>
+            <BottomNav />
+          </div>
         </AuthProvider>
       </body>
     </html>

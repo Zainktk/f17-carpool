@@ -14,7 +14,8 @@ export async function POST(request: Request) {
     // Run transaction to ensure atomicity
     const result = await prisma.$transaction(async (tx: any) => {
       const ride = await tx.ride.findUnique({
-        where: { id: parseInt(rideId) }
+        where: { id: parseInt(rideId) },
+        include: { driver: true }
       });
 
       if (!ride || ride.availableSeats <= 0) {
@@ -46,6 +47,17 @@ export async function POST(request: Request) {
         where: { id: parseInt(rideId) },
         data: { availableSeats: ride.availableSeats - 1 }
       });
+
+      // Send push notification to the driver
+      if (ride.driver && ride.driver.pushSubscription) {
+        import("@/lib/webPush").then(({ sendPushNotification }) => {
+          sendPushNotification(ride.driver!.pushSubscription!, {
+            title: "New Ride Booking!",
+            body: `${booking.rider.name} has booked a seat on your ride.`,
+            url: "/activity"
+          });
+        });
+      }
 
       return booking;
     });
